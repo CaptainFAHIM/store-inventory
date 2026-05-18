@@ -1,0 +1,49 @@
+@model BLL.DTOs.ProductDTO
+
+@{
+    ViewData["Title"] = "Product Details";
+    var statusClass = Model.Qty <= 0 ? "text-bg-danger" : (Model.Qty <= 5 ? "text-bg-warning" : "text-bg-success");
+    var statusText = Model.Qty <= 0 ? "Out of stock" : (Model.Qty <= 5 ? "Low stock" : "In stock");
+}
+
+<div class="form-shell">
+    <div class="form-card">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-2">@Model.Name</h1>
+                <span class="badge @statusClass">@statusText</span>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+                <a asp-action="Index" class="btn btn-outline-primary">Back</a>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="detail-card">
+                    <div class="detail-label">Category</div>
+                    <div class="detail-value">@Model.CategoryName</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="detail-card">
+                    <div class="detail-label">Price</div>
+                    <div class="detail-value">@Model.Price</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="detail-card">
+                    <div class="detail-label">Quantity</div>
+                    <div class="detail-value">@Model.Qty</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="detail-card">
+                    <div class="detail-label">Product Id</div>
+                    <div class="detail-value">@Model.Id</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

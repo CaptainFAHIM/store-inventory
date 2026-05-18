@@ -19,14 +19,19 @@ namespace App.Controllers
             ViewBag.Categories = new SelectList(categoryService.Get(), "Id", "Name", selectedCategoryId);
         }
 
-        public IActionResult Index(string? searchTerm)
+        public IActionResult Index(string? searchTerm, int? categoryId, bool lowStockOnly = false)
         {
             var allProducts = productService.Get();
-            var data = string.IsNullOrWhiteSpace(searchTerm) ? allProducts : productService.Get(searchTerm);
+            var data = productService.Get(searchTerm, categoryId, lowStockOnly);
+            ViewBag.SelectedCategoryId = categoryId;
+            ViewBag.LowStockOnly = lowStockOnly;
             ViewBag.TotalProducts = allProducts.Count;
             ViewBag.TotalCategories = categoryService.Get().Count;
             ViewBag.LowStockProducts = allProducts.Count(x => x.Qty <= 5);
+            ViewBag.OutOfStockProducts = allProducts.Count(x => x.Qty <= 0);
+            ViewBag.InventoryValue = allProducts.Sum(x => x.Price * x.Qty);
             ViewBag.SearchTerm = searchTerm;
+            ViewBag.Categories = new SelectList(categoryService.Get(), "Id", "Name", categoryId);
             return View(data);
         }
         [HttpGet]
@@ -94,6 +99,18 @@ namespace App.Controllers
                 return RedirectToAction("Index");
             }
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var data = productService.Get(id);
+            if (data == null)
+            {
+                return NotFound();
+            }
+
+            return View(data);
         }
 
         [HttpPost]

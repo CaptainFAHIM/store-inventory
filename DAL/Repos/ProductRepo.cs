@@ -19,13 +19,23 @@ namespace DAL.Repos
             db.Products.Add(c);
             return db.SaveChanges() > 0;
         }
-        public List<Product> Get(string? searchTerm = null)
+        public List<Product> Get(string? searchTerm = null, int? categoryId = null, bool lowStockOnly = false)
         {
             var query = db.Products.Include(x => x.CidNavigation).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(x => x.Name.Contains(searchTerm));
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(x => x.Cid == categoryId.Value);
+            }
+
+            if (lowStockOnly)
+            {
+                query = query.Where(x => x.Qty <= 5);
             }
 
             return query.OrderBy(x => x.Name).ToList();

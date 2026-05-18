@@ -17,9 +17,9 @@ namespace BLL.Services
             this.repo = repo;
             mapper = MapperConfig.GetMapper();
         }
-        public List<ProductDTO> Get(string? searchTerm = null)
+        public List<ProductDTO> Get(string? searchTerm = null, int? categoryId = null, bool lowStockOnly = false)
         {
-            var data = repo.Get(searchTerm);
+            var data = repo.Get(searchTerm, categoryId, lowStockOnly);
             var res = mapper.Map<List<ProductDTO>>(data);
             return res;
         }
