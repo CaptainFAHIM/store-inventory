@@ -1,5 +1,16 @@
+:root {
+  --bg-start: #f5f8ff;
+  --bg-end: #eef4ff;
+  --ink: #162033;
+  --muted: #5d6b82;
+  --card: rgba(255, 255, 255, 0.88);
+  --border: rgba(22, 32, 51, 0.08);
+}
+
 html {
-  font-size: 14px;
+  font-size: 15px;
+  position: relative;
+  min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -8,24 +19,190 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
+  margin-bottom: 0;
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, #dbeafe 0%, #eaf2ff 100%);
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-select:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem #fff, 0 0 0 0.25rem rgba(31, 94, 255, 0.25);
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.site-header {
+  padding: 1rem 1rem 0;
+}
+
+.site-nav {
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb 55%, #3b82f6);
+}
+
+.site-nav .navbar-brand,
+.site-nav .nav-link {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.site-nav .nav-link {
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+}
+
+.site-nav .nav-link:hover,
+.site-nav .nav-link:focus {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.page-shell {
+  padding-bottom: 2rem;
+}
+
+.site-footer {
+  margin-top: 1rem;
+  padding: 1rem 0;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.hero-card,
+.inventory-panel,
+.form-card,
+.stat-card {
+  border: 1px solid var(--border);
+  border-radius: 1.4rem;
+  background: var(--card);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+}
+
+.hero-card {
+  padding: 2rem;
+  color: #fff;
+  border: none;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb 55%, #3b82f6);
+}
+
+.hero-card .lead,
+.hero-card .eyebrow {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.stat-card {
+  padding: 1.2rem 1.35rem;
+}
+
+.stat-card.accent {
+  background: linear-gradient(135deg, rgba(31, 94, 255, 0.12), rgba(31, 94, 255, 0.03));
+}
+
+.stat-card.warm {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.15), rgba(217, 119, 6, 0.04));
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.inventory-panel {
+  overflow: hidden;
+}
+
+.inventory-table thead th {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.inventory-table tbody tr:hover {
+  background: rgba(31, 94, 255, 0.04);
+}
+
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qty-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  font-size: 1.1rem;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.qty-btn:hover {
+  filter: brightness(1.05);
+}
+
+.qty-value {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.form-shell {
+  display: flex;
+  justify-content: center;
+}
+
+.form-card {
+  width: min(100%, 720px);
+  padding: 2rem;
+}
+
+.form-card-danger {
+  border-color: rgba(220, 53, 69, 0.25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 241, 242, 0.95));
+}
+
+.empty-state {
+  border: 1px dashed rgba(22, 32, 51, 0.18);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.badge.text-bg-secondary {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+  color: var(--ink) !important;
+}
+
+.form-label {
+  font-weight: 600;
+}
+
+.form-control,
+.form-select {
+  border-radius: 0.9rem;
+  border-color: rgba(22, 32, 51, 0.14);
+}
+
+.btn {
+  border-radius: 0.85rem;
+}
+
+.alert {
+  border-radius: 1rem;
 }

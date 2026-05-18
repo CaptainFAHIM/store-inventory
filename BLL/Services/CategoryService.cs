@@ -22,7 +22,7 @@ namespace BLL.Services
             var res = mapper.Map<List<CategoryDTO>>(data);
             return res;
         }
-        public CategoryDTO Get(int id) {
+        public CategoryDTO? Get(int id) {
             var data = repo.Get(id);
             var res = mapper.Map<CategoryDTO>(data);
             return res;

@@ -1,5 +1,6 @@
 ﻿using DAL.EF;
 using DAL.EF.Tables;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +18,7 @@ namespace DAL.Repos
             return db.SaveChanges() > 0;
         }
         public List<Category> Get() { 
-            return db.Categories.ToList();
+            return db.Categories.OrderBy(x => x.Name).ToList();
         }
         public Category? Get(int id) {
             return db.Categories.Find(id);
@@ -35,6 +36,11 @@ namespace DAL.Repos
         public bool Delete(int id) {
             var exobj = Get(id);
             if (exobj == null)
+            {
+                return false;
+            }
+
+            if (db.Products.Any(x => x.Cid == id))
             {
                 return false;
             }

@@ -1,5 +1,6 @@
 using BLL.Services;
 using DAL.EF;
+using DAL.EF.Tables;
 using DAL.Repos;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,11 +25,28 @@ using (var scope = app.Services.CreateScope())
     if (!db.Categories.Any())
     {
         db.Categories.AddRange(
-            new DAL.EF.Tables.Category { Name = "Electronics" },
-            new DAL.EF.Tables.Category { Name = "Office Supplies" },
-            new DAL.EF.Tables.Category { Name = "Furniture" }
+            new Category { Name = "Electronics" },
+            new Category { Name = "Office Supplies" },
+            new Category { Name = "Furniture" }
         );
         db.SaveChanges();
+    }
+
+    if (!db.Products.Any())
+    {
+        var electronics = db.Categories.FirstOrDefault(x => x.Name == "Electronics");
+        var office = db.Categories.FirstOrDefault(x => x.Name == "Office Supplies");
+        var furniture = db.Categories.FirstOrDefault(x => x.Name == "Furniture");
+
+        if (electronics != null && office != null && furniture != null)
+        {
+            db.Products.AddRange(
+                new Product { Name = "Laptop", Price = 78000, Qty = 8, Cid = electronics.Id },
+                new Product { Name = "Printer Paper Pack", Price = 450, Qty = 35, Cid = office.Id },
+                new Product { Name = "Office Chair", Price = 14500, Qty = 6, Cid = furniture.Id }
+            );
+            db.SaveChanges();
+        }
     }
 }
 

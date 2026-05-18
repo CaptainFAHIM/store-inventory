@@ -21,7 +21,11 @@ namespace App.Controllers
 
         public IActionResult Index(string? searchTerm)
         {
-            var data = productService.Get(searchTerm);
+            var allProducts = productService.Get();
+            var data = string.IsNullOrWhiteSpace(searchTerm) ? allProducts : productService.Get(searchTerm);
+            ViewBag.TotalProducts = allProducts.Count;
+            ViewBag.TotalCategories = categoryService.Get().Count;
+            ViewBag.LowStockProducts = allProducts.Count(x => x.Qty <= 5);
             ViewBag.SearchTerm = searchTerm;
             return View(data);
         }
@@ -35,6 +39,7 @@ namespace App.Controllers
             if (ModelState.IsValid) { 
                var res = productService.Create(p);
                 if (res == true) {
+                    TempData["Success"] = "Product added successfully.";
                     return RedirectToAction("Index");
                 }
             }
@@ -61,6 +66,7 @@ namespace App.Controllers
                 var res = productService.Update(p);
                 if (res == true)
                 {
+                    TempData["Success"] = "Product updated successfully.";
                     return RedirectToAction("Index");
                 }
             }
@@ -81,9 +87,64 @@ namespace App.Controllers
         [HttpPost]
         public IActionResult Delete(int id, string Decision) {
             if (string.Equals(Decision, "Yes", StringComparison.OrdinalIgnoreCase)) { 
-                productService.Delete(id);
+                var deleted = productService.Delete(id);
+                TempData[deleted ? "Success" : "Error"] = deleted
+                    ? "Product deleted successfully."
+                    : "Product could not be deleted.";
                 return RedirectToAction("Index");
             }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult IncreaseQty(int id)
+        {
+            var product = productService.Get(id);
+            if (product == null)
+            {
+                TempData["Error"] = "Product not found.";
+                return RedirectToAction("Index");
+            }
+
+            product.Qty += 1;
+            if (productService.Update(product))
+            {
+                TempData["Success"] = $"{product.Name} quantity increased.";
+            }
+            else
+            {
+                TempData["Error"] = "Could not update the quantity.";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult DecreaseQty(int id)
+        {
+            var product = productService.Get(id);
+            if (product == null)
+            {
+                TempData["Error"] = "Product not found.";
+                return RedirectToAction("Index");
+            }
+
+            if (product.Qty <= 0)
+            {
+                TempData["Error"] = $"{product.Name} is already at zero stock.";
+                return RedirectToAction("Index");
+            }
+
+            product.Qty -= 1;
+            if (productService.Update(product))
+            {
+                TempData["Success"] = $"{product.Name} quantity decreased.";
+            }
+            else
+            {
+                TempData["Error"] = "Could not update the quantity.";
+            }
+
             return RedirectToAction("Index");
         }
     }
