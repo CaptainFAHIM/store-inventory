@@ -123,10 +123,9 @@ namespace App.Controllers
                 return RedirectToAction("Index");
             }
 
-            product.Qty += 1;
-            if (productService.Update(product))
+            if (productService.TryAdjustQuantity(id, 1, "Manual Increase", "Increased from the dashboard"))
             {
-                TempData["Success"] = $"{product.Name} quantity increased.";
+                TempData["Success"] = $"{product.Name} quantity increased and recorded in history.";
             }
             else
             {
@@ -152,10 +151,9 @@ namespace App.Controllers
                 return RedirectToAction("Index");
             }
 
-            product.Qty -= 1;
-            if (productService.Update(product))
+            if (productService.TryAdjustQuantity(id, -1, "Manual Decrease", "Decreased from the dashboard"))
             {
-                TempData["Success"] = $"{product.Name} quantity decreased.";
+                TempData["Success"] = $"{product.Name} quantity decreased and recorded in history.";
             }
             else
             {

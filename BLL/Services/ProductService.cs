@@ -1,20 +1,23 @@
 ﻿using AutoMapper;
 using BLL.DTOs;
+using DAL.EF;
 using DAL.EF.Tables;
 using DAL.Repos;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace BLL.Services
 {
     public class ProductService
     {
         ProductRepo repo;
+        PmsCSp26Context db;
+        StockMovementService stockMovementService;
         Mapper mapper;
-        public ProductService(ProductRepo repo)
+        public ProductService(ProductRepo repo, PmsCSp26Context db, StockMovementService stockMovementService)
         {
             this.repo = repo;
+            this.db = db;
+            this.stockMovementService = stockMovementService;
             mapper = MapperConfig.GetMapper();
         }
         public List<ProductDTO> Get(string? searchTerm = null, int? categoryId = null, bool lowStockOnly = false)
@@ -45,6 +48,46 @@ namespace BLL.Services
         public bool Delete(int id)
         {
             return repo.Delete(id);
+        }
+
+        public bool TryAdjustQuantity(int id, int delta, string movementType, string? notes = null)
+        {
+            using var transaction = db.Database.BeginTransaction();
+
+            var product = db.Products.FirstOrDefault(x => x.Id == id);
+            if (product == null)
+            {
+                return false;
+            }
+
+            var previousQty = product.Qty;
+            var newQty = previousQty + delta;
+            if (newQty < 0)
+            {
+                return false;
+            }
+
+            product.Qty = newQty;
+
+            stockMovementService.Record(new StockMovement
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                MovementType = movementType,
+                QuantityChange = delta,
+                PreviousQty = previousQty,
+                NewQty = newQty,
+                Notes = notes,
+                CreatedAt = DateTime.Now
+            });
+
+            var saved = db.SaveChanges() > 0;
+            if (saved)
+            {
+                transaction.Commit();
+            }
+
+            return saved;
         }
     }
 }

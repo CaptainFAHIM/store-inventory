@@ -1,0 +1,115 @@
+@model IEnumerable<StockMovementDTO>
+
+@{
+    ViewData["Title"] = "Stock History";
+    var totalEntries = Model.Count();
+    var totalIn = Model.Where(x => x.QuantityChange > 0).Sum(x => x.QuantityChange);
+    var totalOut = Model.Where(x => x.QuantityChange < 0).Sum(x => Math.Abs(x.QuantityChange));
+}
+
+<div class="hero-card mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div>
+            <div class="eyebrow">Audit Trail</div>
+            <h1 class="display-6 mb-2">Every stock movement is recorded here.</h1>
+            <p class="lead mb-0">Manual adjustments, opening stock, and received purchase orders all appear in the same history.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="PurchaseOrder" asp-action="Index" class="btn btn-light text-primary fw-semibold">Purchase Orders</a>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-outline-light">Products</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Entries</div>
+            <div class="stat-value">@totalEntries</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card accent">
+            <div class="stat-label">Stock In</div>
+            <div class="stat-value">@totalIn</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card warm">
+            <div class="stat-label">Stock Out</div>
+            <div class="stat-value">@totalOut</div>
+        </div>
+    </div>
+</div>
+
+<div class="inventory-panel p-4 mb-4">
+    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+        <div class="col-12 col-lg-8">
+            <label class="form-label">Search</label>
+            <input name="searchTerm" value="@ViewBag.SearchTerm" class="form-control form-control-lg" placeholder="Search by product, PO number, or movement type" />
+        </div>
+        <div class="col-12 col-lg-auto">
+            <button type="submit" class="btn btn-primary btn-lg">Search</button>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Clear</a>
+        </div>
+    </form>
+</div>
+
+<div class="inventory-panel p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 inventory-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Change</th>
+                    <th>Before</th>
+                    <th>After</th>
+                    <th>Reference</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    var badgeClass = item.QuantityChange > 0
+                        ? "text-bg-success"
+                        : item.QuantityChange < 0
+                            ? "text-bg-danger"
+                            : "text-bg-secondary";
+
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@item.CreatedAt.ToString("dd MMM yyyy")</div>
+                            <div class="small text-muted">@item.CreatedAt.ToString("HH:mm")</div>
+                        </td>
+                        <td>@item.ProductName</td>
+                        <td><span class="badge @badgeClass">@item.MovementType</span></td>
+                        <td>@item.QuantityChange</td>
+                        <td>@item.PreviousQty</td>
+                        <td>@item.NewQty</td>
+                        <td>
+                            <div class="fw-semibold">@(item.PurchaseOrderNumber ?? "-")</div>
+                        </td>
+                        <td>@(item.Notes ?? "-")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state py-5 text-center">
+                            <h3 class="h4 mb-2">No stock history yet</h3>
+                            <p class="text-muted mb-0">Receive a purchase order or adjust stock from the products page to create entries here.</p>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

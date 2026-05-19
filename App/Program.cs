@@ -1,4 +1,6 @@
 using BLL.Services;
+using BLL.DTOs;
+using App.Infrastructure;
 using DAL.EF;
 using DAL.EF.Tables;
 using DAL.Repos;
@@ -15,12 +17,15 @@ builder.Services.AddScoped<CategoryRepo>();
 builder.Services.AddScoped<ProductRepo>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<StockMovementService>();
+builder.Services.AddScoped<PurchaseOrderService>();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PmsCSp26Context>();
     db.Database.EnsureCreated();
+    InventorySchema.EnsureWorkflowTables(db);
 
     if (!db.Categories.Any())
     {
@@ -47,6 +52,47 @@ using (var scope = app.Services.CreateScope())
             );
             db.SaveChanges();
         }
+    }
+
+    if (!db.StockMovements.Any() && db.Products.Any())
+    {
+        db.StockMovements.AddRange(
+            db.Products.Select(product => new StockMovement
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                MovementType = "Opening Stock",
+                QuantityChange = product.Qty,
+                PreviousQty = 0,
+                NewQty = product.Qty,
+                Notes = "Seeded inventory",
+                CreatedAt = DateTime.Now
+            }));
+        db.SaveChanges();
+    }
+
+    if (!db.PurchaseOrders.Any() && db.Products.Any())
+    {
+        var demoProduct = db.Products.First();
+        db.PurchaseOrders.Add(new PurchaseOrder
+        {
+            OrderNumber = "PO-DEMO-001",
+            SupplierName = "Demo Supplies",
+            Status = PurchaseOrderStatus.Approved,
+            ApprovedAt = DateTime.Now,
+            CreatedAt = DateTime.Now.AddMinutes(-10),
+            Items = new List<PurchaseOrderItem>
+            {
+                new PurchaseOrderItem
+                {
+                    ProductId = demoProduct.Id,
+                    ProductName = demoProduct.Name,
+                    Qty = 4,
+                    UnitCost = demoProduct.Price
+                }
+            }
+        });
+        db.SaveChanges();
     }
 }
 

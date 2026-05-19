@@ -1,0 +1,120 @@
+@model PurchaseOrderDTO
+
+@{
+    ViewData["Title"] = "Purchase Order Details";
+    var badgeClass = Model.Status == PurchaseOrderStatus.Received
+        ? "text-bg-success"
+        : Model.Status == PurchaseOrderStatus.Approved
+            ? "text-bg-primary"
+            : Model.Status == PurchaseOrderStatus.Cancelled
+                ? "text-bg-danger"
+                : "text-bg-warning";
+}
+
+<div class="hero-card mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div>
+            <div class="eyebrow">Purchase Order</div>
+            <h1 class="display-6 mb-2">@Model.OrderNumber</h1>
+            <p class="lead mb-0">Supplier: @Model.SupplierName</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge @badgeClass fs-6">@Model.Status</span>
+            <a asp-action="Index" class="btn btn-light text-primary fw-semibold">Back</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Product</div>
+            <div class="stat-value">@(Model.ProductName ?? "-")</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card accent">
+            <div class="stat-label">Quantity</div>
+            <div class="stat-value">@Model.Qty</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card warm">
+            <div class="stat-label">Total Cost</div>
+            <div class="stat-value">@Model.TotalCost</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="inventory-panel p-4 h-100">
+            <h2 class="h5 mb-3">Order Summary</h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">Supplier</div>
+                        <div class="detail-value">@Model.SupplierName</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">@Model.Status</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">Unit Cost</div>
+                        <div class="detail-value">@Model.UnitCost</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">Created</div>
+                        <div class="detail-value">@Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">Approved</div>
+                        <div class="detail-value">@(Model.ApprovedAt?.ToString("dd MMM yyyy HH:mm") ?? "-")</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">Received</div>
+                        <div class="detail-value">@(Model.ReceivedAt?.ToString("dd MMM yyyy HH:mm") ?? "-")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="inventory-panel p-4 h-100">
+            <h2 class="h5 mb-3">Notes</h2>
+            <p class="mb-4">@(string.IsNullOrWhiteSpace(Model.Notes) ? "No notes were added to this order." : Model.Notes)</p>
+
+            <div class="d-flex flex-wrap gap-2">
+                @if (Model.Status == PurchaseOrderStatus.Pending)
+                {
+                    <form asp-action="Approve" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-secondary">Approve</button>
+                    </form>
+                    <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger">Cancel</button>
+                    </form>
+                }
+                else if (Model.Status == PurchaseOrderStatus.Approved)
+                {
+                    <form asp-action="Receive" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-success">Receive</button>
+                    </form>
+                    <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger">Cancel</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,154 @@
+@model IEnumerable<PurchaseOrderDTO>
+
+@{
+    ViewData["Title"] = "Purchase Orders";
+    var statuses = ViewBag.Statuses as string[] ?? Array.Empty<string>();
+    var totalOrders = Model.Count();
+    var pendingOrders = Model.Count(x => x.Status == PurchaseOrderStatus.Pending);
+    var receivedOrders = Model.Count(x => x.Status == PurchaseOrderStatus.Received);
+    var cancelledOrders = Model.Count(x => x.Status == PurchaseOrderStatus.Cancelled);
+}
+
+<div class="hero-card mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div>
+            <div class="eyebrow">Purchasing Workflow</div>
+            <h1 class="display-6 mb-2">Track purchase orders through approval and receiving.</h1>
+            <p class="lead mb-0">Stock is added only when a purchase order reaches the Received state.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="Create" class="btn btn-light text-primary fw-semibold">New Purchase Order</a>
+            <a asp-controller="StockMovement" asp-action="Index" class="btn btn-outline-light">Stock History</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-label">Orders</div>
+            <div class="stat-value">@totalOrders</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card accent">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value">@pendingOrders</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card warm">
+            <div class="stat-label">Received</div>
+            <div class="stat-value">@receivedOrders</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-label">Cancelled</div>
+            <div class="stat-value">@cancelledOrders</div>
+        </div>
+    </div>
+</div>
+
+<div class="inventory-panel p-4 mb-4">
+    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+        <div class="col-12 col-lg-5">
+            <label class="form-label">Search</label>
+            <input name="searchTerm" value="@ViewBag.SearchTerm" class="form-control form-control-lg" placeholder="Search order, supplier, or product" />
+        </div>
+        <div class="col-12 col-lg-4">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select form-select-lg">
+                <option value="">All statuses</option>
+                @foreach (var status in statuses)
+                {
+                    <option value="@status" selected="@(ViewBag.SelectedStatus == status)">@status</option>
+                }
+            </select>
+        </div>
+        <div class="col-12 col-lg-auto">
+            <button type="submit" class="btn btn-primary btn-lg">Filter</button>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Clear</a>
+        </div>
+    </form>
+</div>
+
+<div class="inventory-panel p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 inventory-table">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Supplier</th>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Unit Cost</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    var badgeClass = item.Status == PurchaseOrderStatus.Received
+                        ? "text-bg-success"
+                        : item.Status == PurchaseOrderStatus.Approved
+                            ? "text-bg-primary"
+                            : item.Status == PurchaseOrderStatus.Cancelled
+                                ? "text-bg-danger"
+                                : "text-bg-warning";
+
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@item.OrderNumber</div>
+                            <div class="small text-muted">@item.CreatedAt.ToString("dd MMM yyyy HH:mm")</div>
+                        </td>
+                        <td>@item.SupplierName</td>
+                        <td>@(item.ProductName ?? "-")</td>
+                        <td>@item.Qty</td>
+                        <td>@item.UnitCost</td>
+                        <td>@item.TotalCost</td>
+                        <td><span class="badge @badgeClass">@item.Status</span></td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Details</a>
+                            @if (item.Status == PurchaseOrderStatus.Pending)
+                            {
+                                <form asp-action="Approve" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Approve</button>
+                                </form>
+                                <form asp-action="Cancel" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                </form>
+                            }
+                            else if (item.Status == PurchaseOrderStatus.Approved)
+                            {
+                                <form asp-action="Receive" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success">Receive</button>
+                                </form>
+                                <form asp-action="Cancel" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state py-5 text-center">
+                            <h3 class="h4 mb-2">No purchase orders yet</h3>
+                            <p class="text-muted mb-3">Create the first order to start the receiving workflow.</p>
+                            <a asp-action="Create" class="btn btn-primary">Create Purchase Order</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
