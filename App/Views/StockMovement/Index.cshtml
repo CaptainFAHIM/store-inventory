@@ -10,9 +10,9 @@
 <div class="hero-card mb-4">
     <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
         <div>
-            <div class="eyebrow">Audit Trail</div>
-            <h1 class="display-6 mb-2">Every stock movement is recorded here.</h1>
-            <p class="lead mb-0">Manual adjustments, opening stock, and received purchase orders all appear in the same history.</p>
+            <div class="eyebrow"></div>
+            <h1 class="display-6 mb-2">Stock movement History.</h1>
+            <p class="lead mb-0"></p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a asp-controller="PurchaseOrder" asp-action="Index" class="btn btn-light text-primary fw-semibold">Purchase Orders</a>
@@ -46,7 +46,7 @@
     <form asp-action="Index" method="get" class="row g-3 align-items-end">
         <div class="col-12 col-lg-8">
             <label class="form-label">Search</label>
-            <input name="searchTerm" value="@ViewBag.SearchTerm" class="form-control form-control-lg" placeholder="Search by product, PO number, or movement type" />
+            <input name="searchTerm" value="@ViewBag.SearchTerm" class="form-control form-control-lg" placeholder="Search by product or Reference" />
         </div>
         <div class="col-12 col-lg-auto">
             <button type="submit" class="btn btn-primary btn-lg">Search</button>
